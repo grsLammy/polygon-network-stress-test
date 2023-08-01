@@ -1,10 +1,15 @@
-import {getInfuraProjectID, getMnemonics} from './environmentConfig';
-import {ethers, Wallet} from 'ethers';
-import {Setup} from './dataTypes';
+import {
+  getInfuraProjectID,
+  getMnemonics,
+  getPrivateKey,
+} from './environmentConfig';
 import dotenv from 'dotenv';
-dotenv.config();
 const mnemonics = getMnemonics();
+import {Setup} from './dataTypes';
+import {FUND} from './constants';
+import {ethers, Wallet} from 'ethers';
 const infuraProjectID = getInfuraProjectID();
+dotenv.config();
 
 /*  
   - get the balances of the wallet addresses used for testing.
@@ -46,14 +51,46 @@ async function checkBalances(
     const zero = ethers.BigNumber.from(0);
     for (let i = 0; i < balance.length; i++) {
       if (balance[i].eq(zero)) {
-        console.log(
-          '\nTerminating the operation since one or more wallet address has 0 balance'
-        );
-        process.exit(0);
+        if (FUND === 1) {
+          console.log('\n----------------------------------------------');
+          console.log('FUNDING WALLET WITH 0 BALANCES');
+          console.log('----------------------------------------------\n');
+          // Fund account if balance is zero
+          await fundAccountIfBalanceZero(wallets[i], provider);
+        } else {
+          console.log(
+            '\nTerminating the operation since one or more wallet address has 0 balance'
+          );
+          process.exit(0);
+        }
       }
     }
   } catch (error) {
     console.log('\nError while getting balance: ', error);
+  }
+}
+
+async function fundAccountIfBalanceZero(
+  wallet: Wallet,
+  provider: ethers.providers.JsonRpcProvider
+) {
+  try {
+    const balance = await provider.getBalance(wallet.address);
+    if (balance.isZero()) {
+      console.log(`Funding account ${wallet.address} with 2 MATIC`);
+      const fundingWallet: ethers.Wallet = new ethers.Wallet(
+        getPrivateKey(),
+        provider
+      );
+      const transaction = {
+        to: wallet.address,
+        value: ethers.utils.parseEther('2'),
+      };
+      await fundingWallet.sendTransaction(transaction);
+    }
+  } catch (error) {
+    console.log('Error in while funding', error);
+    process.exit(1);
   }
 }
 

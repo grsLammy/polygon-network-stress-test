@@ -2,6 +2,7 @@ import {ethers} from 'ethers';
 import PQueue from 'p-queue';
 import dotenv from 'dotenv';
 import crypto from 'crypto';
+import {PQUEUE_LEVEL} from './constants';
 import {gasPriceFetcher} from './gasPriceFetcher';
 
 dotenv.config();
@@ -36,14 +37,14 @@ async function retryOperation(
       return await waitForTransaction(operation(), provider);
     } catch (error) {
       console.log(
-        `Transaction failed with error: ${error}. Retrying ${
+        `\nTransaction failed with error: ${error}. Retrying ${
           retries - i - 1
         } more times.`
       );
     }
   }
 
-  throw new Error('Transaction failed after ' + retries + ' retries');
+  throw new Error('\nTransaction failed after ' + retries + ' retries');
 }
 
 export async function tokenMinter(
@@ -98,7 +99,7 @@ export async function tokenMinter(
     ADD THE TRANSACTION TO THE WALLET'S QUEUE
   */
   txQueues[wallet.address] =
-    txQueues[wallet.address] || new PQueue({concurrency: 1});
+    txQueues[wallet.address] || new PQueue({concurrency: PQUEUE_LEVEL});
 
   /* 
     THIS WILL ENSURE THAT TRANSACTIONS FOR EACH WALLET ARE CREATED SEQUENTIALLY

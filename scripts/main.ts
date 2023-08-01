@@ -1,12 +1,13 @@
-import {ethers} from 'ethers';
 import {abi, address} from '../deployments/mumbai/TestERC721.json';
+import {redisReceiptStore} from './utils/redisReceiptStore';
 import {tokenMinter} from './utils/tokenMinter'; // import the mintToken function
 import {redisClient} from './utils/redisClient';
-import {redisReceiptStore} from './utils/redisReceiptStore';
-import {receiptSaver} from './utils/receiptSaver';
-import PromisePool from 'es6-promise-pool';
+import {ethers} from 'ethers';
 import readline from 'readline';
+import PromisePool from 'es6-promise-pool';
 import {web3Setup} from './utils/web3Setup';
+import {receiptSaver} from './utils/receiptSaver';
+import {CONCURRENCY_LEVEL} from './utils/constants';
 import {transactionDataMapper} from './utils/transactionDataMapper';
 
 async function main() {
@@ -66,13 +67,16 @@ async function main() {
   /*
       USE PROMISE POOL TO CONCURRENTLY MINT TOKENS WITH A MAXIMUM CONCURRENCY
   */
-  new PromisePool(() => mintOperations.next().value, 10);
+  new PromisePool(() => mintOperations.next().value, CONCURRENCY_LEVEL);
 
   const mintPromises: Promise<ethers.providers.TransactionReceipt>[] = [];
   let result;
   while (!(result = mintOperations.next()).done) {
     mintPromises.push(result.value);
   }
+  console.log('\n----------------------------------------------');
+  console.log('STRESS TEST - START MINTING');
+  console.log('----------------------------------------------\n');
 
   await Promise.all(
     mintPromises.map((mintPromise) =>
@@ -87,7 +91,9 @@ async function main() {
     )
   );
 
-  console.log(`\nNFTs have been minted`);
+  console.log(
+    `\n${tokensPerAccount * numberOfAccounts} NFTs have been minted `
+  );
 }
 
 main()

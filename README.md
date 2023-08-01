@@ -89,12 +89,12 @@ Start the stress test by using the following commands:
 
 With npm:
 ```bash
-npm run start
+npm run stressTest
 ```
 
 With Yarn:
 ```bash
-yarn start
+yarn run stressTest
 ```
 
 Upon starting, the program will prompt you to input the number of accounts to create and the number of tokens to mint per account.
@@ -155,7 +155,7 @@ Please reach out to the maintainer of this repository for further queries.
 ## Author
 
 Gulam Rasul Shah
-Github: @ygrsLammy
+Github: @grsLammy
 
 
 

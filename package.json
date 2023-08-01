@@ -3,12 +3,13 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
+    "compile": "hardhat compile",
+    "clean": "npx hardhat clean",
+    "stressTest": "npx hardhat run ./scripts/main.ts",
     "lint": "eslint \"**/*.{js,ts}\" && solhint src/**/*.sol",
     "lint:fix": "eslint --fix \"**/*.{js,ts}\" && solhint --fix src/**/*.sol",
     "format": "prettier --check \"**/*.{ts,js,sol}\"",
     "format:fix": "prettier --write \"**/*.{ts,js,sol}\"",
-    "compile": "hardhat compile",
-    "clean": "npx hardhat clean",
     "deploy:mumbai": "npx hardhat --network mumbai deploy",
     "gas": "cross-env REPORT_GAS=true hardhat test",
     "coverage": "cross-env HARDHAT_DEPLOY_FIXTURE=true hardhat coverage"
@@ -22,15 +23,12 @@
     "@truffle/hdwallet-provider": "^2.0.15",
     "@typechain/ethers-v5": "^7.0.1",
     "@typechain/hardhat": "^2.0.2",
-    "@types/chai": "^4.2.18",
-    "@types/mocha": "^8.0.2",
     "@types/node": "^18.11.10",
     "@types/p-queue": "^3.2.1",
     "@types/redis": "^4.0.11",
     "@typescript-eslint/eslint-plugin": "^4.26.1",
     "@typescript-eslint/parser": "^4.26.1",
-    "chai": "^4.3.7",
-    "chai-ethers": "^0.0.1",
+    "cross-env": "^7.0.3",
     "dotenv": "^16.0.3",
     "es6-promise-pool": "^2.5.0",
     "eslint": "^7.28.0",
@@ -41,11 +39,9 @@
     "hardhat-deploy": "^0.8.7",
     "hardhat-gas-reporter": "^1.0.9",
     "lint-staged": "^13.0.4",
-    "mocha": "^9.0.0",
     "p-queue": "^6.6.2",
     "prettier": "^2.8.0",
     "prettier-plugin-solidity": "^1.0.0",
-    "prompt-sync": "^4.2.0",
     "redis": "^4.6.7",
     "solhint": "^3.3.6",
     "solhint-plugin-prettier": "^0.0.5",
@@ -56,8 +52,7 @@
     "typescript": "^4.9.3"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^4.8.0",
-    "cross-env": "^7.0.3"
+    "@openzeppelin/contracts": "^4.8.0"  
   },
   "lint-staged": {
     "*.{ts,json,sol,md,yml}": "prettier --write"

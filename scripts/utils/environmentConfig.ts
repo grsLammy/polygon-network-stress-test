@@ -30,3 +30,13 @@ export const getExplorerApiKey = (): string => {
 
   return explorerApiKey;
 };
+
+export const getMnemonics = (): string => {
+  const mnemonics = process.env.MNEMONICS;
+
+  if (!mnemonics) {
+    throw new Error('MNEMONICS environment variable is not set.');
+  }
+
+  return mnemonics;
+};

@@ -6,22 +6,15 @@ import {redisReceiptStore} from './utils/redisReceiptStore';
 import {receiptSaver} from './utils/receiptSaver';
 import PromisePool from 'es6-promise-pool';
 import readline from 'readline';
-import {web3ProviderSetup} from './utils/web3ProviderSetup';
+import {web3Setup} from './utils/web3Setup';
 import {transactionDataMapper} from './utils/transactionDataMapper';
 
 async function main() {
-  console.log('\n-----------------------------------------');
-  console.log('STRESS TEST - ERC721 MINT');
-  console.log('-----------------------------------------\n');
-  /*
-    INITIALIZE PROVIDER AND CONTRACT
-  */
-  const {provider, accounts} = await web3ProviderSetup();
+  console.clear();
 
-  /*
-    INITIALIZE CONTRACT INSTANCE
-  */
-  const contractInstance = new ethers.Contract(address, abi, provider);
+  console.log('\n----------------------------------------------');
+  console.log('STRESS TEST - ERC721 MINT');
+  console.log('----------------------------------------------\n');
 
   /*
     CONNECT TO REDIS
@@ -39,19 +32,31 @@ async function main() {
   const askQuestion = (query) =>
     new Promise((resolve) => rl.question(query, resolve));
 
-  const tokensPerAccount = await askQuestion('How many tokens per account? ');
-  const numberOfAccounts = await askQuestion('How many accounts? ');
+  const tokensPerAccount = Number(
+    await askQuestion('How many tokens per account? ')
+  );
+  const numberOfAccounts = Number(await askQuestion('How many accounts? '));
 
   rl.close();
 
   /*
-    GENERATE AN ARRAY OF PROMISES FOR EACH MINT OPERATION
+    INITIALIZE PROVIDER AND CONTRACT
+  */
+  const {provider, wallets} = await web3Setup(numberOfAccounts);
+
+  /*
+    INITIALIZE CONTRACT INSTANCE
+  */
+  const contractInstance = new ethers.Contract(address, abi, provider);
+
+  /*
+      GENERATE AN ARRAY OF PROMISES FOR EACH MINT OPERATION
   */
   function* createMintOperations() {
     for (let i = 0; i < Number(numberOfAccounts); i++) {
-      const account = accounts[i];
+      const wallet = wallets[i];
       for (let j = 0; j < Number(tokensPerAccount); j++) {
-        yield tokenMinter(account, provider, contractInstance);
+        yield tokenMinter(wallet, provider, contractInstance);
       }
     }
   }
@@ -59,9 +64,9 @@ async function main() {
   const mintOperations = createMintOperations();
 
   /*
-    USE PROMISE POOL TO CONCURRENTLY MINT TOKENS WITH A MAIMUM CONCURRENCY
+      USE PROMISE POOL TO CONCURRENTLY MINT TOKENS WITH A MAXIMUM CONCURRENCY
   */
-  const pool = new PromisePool(() => mintOperations.next().value, 10);
+  new PromisePool(() => mintOperations.next().value, 10);
 
   const mintPromises: Promise<ethers.providers.TransactionReceipt>[] = [];
   let result;
@@ -87,7 +92,7 @@ async function main() {
 
 main()
   .then(() => {
-    console.log('\n\n---------- ENDING ALL PROCESS ----------\n\n');
+    console.log('\n\n-------------- ENDING ALL PROCESS --------------\n\n');
     process.exit(0);
   })
   .catch((error) => {

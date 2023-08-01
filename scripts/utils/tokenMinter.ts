@@ -7,8 +7,8 @@ import {gasPriceFetcher} from './gasPriceFetcher';
 dotenv.config();
 
 /* 
-  INITIALIZE A QUEUE FOR EACH ACCOUNT, THIS ENSURES THAT TRANSACTIONS
-  FOR EACH ACCOUNT ARE CREATED SEQUENTIALLY, WHICH SIMPLIFIES NONCE MANGEMENT
+  INITIALIZE A QUEUE FOR EACH WALLET, THIS ENSURES THAT TRANSACTIONS
+  FOR EACH WALLET ARE CREATED SEQUENTIALLY, WHICH SIMPLIFIES NONCE MANGEMENT
 */
 const txQueues = {};
 /* 
@@ -47,7 +47,7 @@ async function retryOperation(
 }
 
 export async function tokenMinter(
-  account: ethers.Wallet,
+  wallet: ethers.Wallet,
   provider: ethers.providers.JsonRpcProvider,
   contractInstance: ethers.Contract
 ): Promise<ethers.providers.TransactionReceipt> {
@@ -64,30 +64,30 @@ export async function tokenMinter(
   /* 
     CONNECT WITH SIGNER
   */
-  const contract: ethers.Contract = contractInstance.connect(account);
-  const accountData = {};
+  const contract: ethers.Contract = contractInstance.connect(wallet);
+  const walletData = {};
   /* 
     CHECK THE USERS NONCE MAP FIRST
   */
-  if (!(account.address in accountData)) {
+  if (!(wallet.address in walletData)) {
     /* 
-      IF THERE IS NO ENTRY FOR THIS ACCOUNT, FETCH THE NONCE FROM THE PROVIDER
+      IF THERE IS NO ENTRY FOR THIS WALLET, FETCH THE NONCE FROM THE PROVIDER
     */
-    accountData[account.address] = await provider.getTransactionCount(
-      account.address
+    walletData[wallet.address] = await provider.getTransactionCount(
+      wallet.address
     );
   } else {
     /* 
-      IF THERE IS AN ENTRY FOR THIS ACCOUNT, INCREMENT THE NONCE
+      IF THERE IS AN ENTRY FOR THIS WALLET, INCREMENT THE NONCE
     */
-    accountData[account.address]++;
+    walletData[wallet.address]++;
   }
 
   const gasEstimate = await contract.estimateGas.issueToken(
-    account.address,
+    wallet.address,
     hash,
     {
-      nonce: accountData[account.address].nonce,
+      nonce: walletData[wallet.address].nonce,
       gasLimit: 14_999_999,
       maxFeePerGas: maxFee,
       maxPriorityFeePerGas: maxPriorityFee,
@@ -95,19 +95,19 @@ export async function tokenMinter(
   );
 
   /* 
-    ADD THE TRANSACTION TO THE ACCOUNT'S QUEUE
+    ADD THE TRANSACTION TO THE WALLET'S QUEUE
   */
-  txQueues[account.address] =
-    txQueues[account.address] || new PQueue({concurrency: 1});
+  txQueues[wallet.address] =
+    txQueues[wallet.address] || new PQueue({concurrency: 1});
 
   /* 
-    THIS WILL ENSURE THAT TRANSACTIONS FOR EACH ACCOUNT ARE CREATED SEQUENTIALLY
+    THIS WILL ENSURE THAT TRANSACTIONS FOR EACH WALLET ARE CREATED SEQUENTIALLY
     THUS, EACH TRANSACTION WILL HAVE CORRECT NONCE
   */
-  return txQueues[account.address].add(() =>
+  return txQueues[wallet.address].add(() =>
     retryOperation(async () => {
-      return contract.issueToken(account.address, hash, {
-        nonce: accountData[account.address].nonce,
+      return contract.issueToken(wallet.address, hash, {
+        nonce: walletData[wallet.address].nonce,
         gasLimit: gasEstimate,
         maxFeePerGas: maxFee,
         maxPriorityFeePerGas: maxPriorityFee,

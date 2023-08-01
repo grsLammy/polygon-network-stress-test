@@ -1,4 +1,4 @@
-import {ethers} from 'ethers';
+import {ethers, Wallet} from 'ethers';
 
 export interface GasData {
   maxFee: number;
@@ -25,7 +25,7 @@ export interface GasApiResponse {
 
 export interface Setup {
   provider: ethers.providers.InfuraProvider;
-  accounts: ethers.Wallet[];
+  wallets: Wallet[];
 }
 
 export interface MappedReceipt {

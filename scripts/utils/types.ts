@@ -26,9 +26,6 @@ export interface GasApiResponse {
 export interface Setup {
   provider: ethers.providers.InfuraProvider;
   signer: ethers.Wallet;
-  nonce: number;
-  maxFee: number;
-  maxPriorityFee: number;
 }
 
 export interface MappedReceipt {

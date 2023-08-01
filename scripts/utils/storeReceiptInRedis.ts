@@ -1,11 +1,12 @@
-import Redis, {RedisClientType} from 'redis';
-const redisClient: RedisClientType = Redis.createClient();
 import {MappedReceipt} from './types';
+import {RedisClientType} from 'redis';
 
 // Function to save mapped receipt to redis database
-export async function redisDB(mappedReceipt: MappedReceipt): Promise<void> {
+export async function storeReceiptInRedis(
+  mappedReceipt: MappedReceipt,
+  redisClient: RedisClientType
+): Promise<void> {
   try {
-    await redisClient.connect();
     const hsetObject: Record<string, string> = {
       type: mappedReceipt.type.toString(),
       from: mappedReceipt.from,

@@ -1,18 +1,25 @@
 import {abi, address} from '../deployments/mumbai/TestERC721.json';
-import {Setup} from './utils/types';
+import {Setup, GasData} from './utils/types';
 import {setup} from './utils/setup';
 import {ethers} from 'ethers';
 import dotenv from 'dotenv';
 import crypto from 'crypto';
 import ps, {Prompt} from 'prompt-sync';
 import {dataMapping} from './utils/dataMapping';
-import {redisDB} from './utils/redisDB';
 import {saveReceipt} from './utils/saveReceipt';
+import {fetchGasPrice} from './utils/fetchGasPrice';
+import {connectToRedis} from './utils/connectToRedis';
+import {storeReceiptInRedis} from './utils/storeReceiptInRedis';
 const prompt: Prompt = ps();
 dotenv.config();
 
 const issueToken = async () => {
   try {
+    /*
+      ESTABLISH REDIS CONNECTION
+    */
+    const redisClient = await connectToRedis();
+
     console.log('\n-----------------------------------------');
     console.log('STRESS TEST - ERC721 MINT');
     console.log('-----------------------------------------\n');
@@ -25,8 +32,7 @@ const issueToken = async () => {
 
     /* ---------------------------- SETUP ------------------------------ */
 
-    const {provider, signer, nonce, maxFee, maxPriorityFee}: Setup =
-      await setup();
+    const {provider, signer}: Setup = await setup();
 
     /* ---------------------------- issueToken ---------------------------- */
 
@@ -48,7 +54,18 @@ const issueToken = async () => {
     console.log('-----------------------------------------\n');
 
     for (let i = 0; i < loop; i++) {
+      /*
+        GENERATE RANDOM HASH
+      */
       const hash: string = crypto.randomBytes(20).toString('hex');
+
+      /*
+        GET SIGNER NONCE
+      */
+      const nonce: number = await provider.getTransactionCount(signer.address);
+
+      // Fetch the latest gas price data from the polygon v2 gas station API
+      const {maxFee, maxPriorityFee}: GasData = await fetchGasPrice();
 
       /*
         ESTIMATE GAS
@@ -71,7 +88,7 @@ const issueToken = async () => {
           maxFeePerGas: maxFee,
           maxPriorityFeePerGas: maxPriorityFee,
         });
-      await mintResponse.wait(1); // wait for 1 block confirmation
+      await mintResponse.wait();
       const txReceipt: ethers.providers.TransactionReceipt =
         await provider.getTransactionReceipt(mintResponse.hash);
 
@@ -83,9 +100,10 @@ const issueToken = async () => {
         await saveReceipt(mappedReceipt);
 
         // saves the transaction receipt in redisDB
-        await redisDB(mappedReceipt);
+        await storeReceiptInRedis(mappedReceipt, redisClient);
       }
     }
+    console.log('All NFTs minted and logs stored at local and Redis');
   } catch (error) {
     console.log('Error in issueToken', error);
     process.exit(1);

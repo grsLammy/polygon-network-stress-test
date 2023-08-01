@@ -34,6 +34,12 @@ const issueToken = async () => {
 
     const {provider, signer}: Setup = await setup();
 
+    // Calculate the end time for the loop
+    const endTime = Date.now() + 60000; // 60 seconds (60,000 milliseconds)
+
+    // Initialize a variable to keep track of the number of NFTs minted
+    let mintedCount = 0;
+
     /* ---------------------------- issueToken ---------------------------- */
 
     /* 
@@ -93,6 +99,9 @@ const issueToken = async () => {
         await provider.getTransactionReceipt(mintResponse.hash);
 
       if (txReceipt !== null && txReceipt !== undefined) {
+        // Increment the mintedCount for each successful mint
+        mintedCount++;
+
         // success transaction receipt gets mapped here
         const mappedReceipt = await dataMapping(txReceipt);
 
@@ -102,8 +111,17 @@ const issueToken = async () => {
         // saves the transaction receipt in redisDB
         await storeReceiptInRedis(mappedReceipt, redisClient);
       }
+      // If the elapsed time exceeds 60 seconds, break the loop
+      if (Date.now() >= endTime) {
+        console.log(
+          `Loop stopped after minting ${mintedCount} NFTs in 60 seconds.`
+        );
+        break;
+      }
     }
-    console.log('All NFTs minted and logs stored at local and Redis');
+    console.log(
+      `${mintedCount} NFTs minted and logs stored at local and Redis`
+    );
   } catch (error) {
     console.log('Error in issueToken', error);
     process.exit(1);

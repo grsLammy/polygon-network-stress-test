@@ -1,4 +1,4 @@
-import {HardhatUserConfig, task} from 'hardhat/config';
+import {HardhatUserConfig} from 'hardhat/config';
 import 'hardhat-deploy';
 import '@nomiclabs/hardhat-ethers';
 import '@nomiclabs/hardhat-waffle';
@@ -6,8 +6,17 @@ import dotenv from 'dotenv';
 import 'solidity-coverage';
 import '@typechain/hardhat';
 import 'hardhat-gas-reporter';
+import {
+  getExplorerApiKey,
+  getInfuraProjectID,
+  getPrivateKey,
+} from './scripts/utils/config';
 import '@nomiclabs/hardhat-etherscan';
 dotenv.config();
+
+const privateKey = getPrivateKey();
+const explorerApiKey = getExplorerApiKey();
+const infuraProjectID = getInfuraProjectID();
 
 const config: HardhatUserConfig = {
   solidity: {
@@ -34,21 +43,10 @@ const config: HardhatUserConfig = {
     user1: 4,
   },
   networks: {
-    goerli: {
-      url: `https://goerli.infura.io/v3/${process.env.INFURA_GOERLI_PROJECT_ID}`,
-      gasPrice: 'auto',
-      accounts:
-        process.env.PRIVATE_KEY_GOERLI !== undefined
-          ? [process.env.PRIVATE_KEY_GOERLI]
-          : [],
-    },
     mumbai: {
-      url: `https://polygon-mumbai.infura.io/v3/${process.env.INFURA_POLYGON_PROJECT_ID}`,
+      url: `https://polygon-mumbai.infura.io/v3/${infuraProjectID}`,
       gasPrice: 'auto',
-      accounts:
-        process.env.PRIVATE_KEY_POLYGON !== undefined
-          ? [process.env.PRIVATE_KEY_POLYGON]
-          : [],
+      accounts: privateKey !== undefined ? [privateKey] : [],
     },
   },
   paths: {
@@ -63,7 +61,7 @@ const config: HardhatUserConfig = {
     target: 'ethers-v5',
   },
   etherscan: {
-    apiKey: process.env.POLYGON_EXPLORER_API_KEY || '',
+    apiKey: explorerApiKey || '',
   },
 };
 

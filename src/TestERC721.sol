@@ -1,5 +1,5 @@
-// SPDX-Liciense-Identifier: UNLICENSED
-pragma solidity 0.8.7;
+// SPDX-License-Identifier: Unlicense
+pragma solidity ^0.8.7;
 
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";

@@ -9,6 +9,7 @@
     "format:fix": "prettier --write \"**/*.{ts,js,sol}\"",
     "compile": "hardhat compile",
     "clean": "npx hardhat clean",
+    "deploy:mumbai": "npx hardhat --network mumbai deploy",
     "gas": "cross-env REPORT_GAS=true hardhat test",
     "coverage": "cross-env HARDHAT_DEPLOY_FIXTURE=true hardhat coverage"
   },

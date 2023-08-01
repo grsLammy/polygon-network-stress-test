@@ -1,8 +1,10 @@
 import fs from 'fs';
-import {MappedReceipt} from './types';
+import {MappedReceipt} from './dataTypes';
 
 // Function to save receipt locally as a JSON log file
-export async function saveReceipt(mappedReceipt: MappedReceipt): Promise<void> {
+export async function receiptSaver(
+  mappedReceipt: MappedReceipt
+): Promise<void> {
   try {
     if (fs.existsSync('log/log.json')) {
       const existingLog = fs.readFileSync('log/log.json', 'utf-8');

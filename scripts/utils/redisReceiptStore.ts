@@ -1,8 +1,8 @@
-import {MappedReceipt} from './types';
+import {MappedReceipt} from './dataTypes';
 import {RedisClientType} from 'redis';
 
 // Function to save mapped receipt to redis database
-export async function storeReceiptInRedis(
+export async function redisReceiptStore(
   mappedReceipt: MappedReceipt,
   redisClient: RedisClientType
 ): Promise<void> {

@@ -10,7 +10,7 @@ import {
   getExplorerApiKey,
   getInfuraProjectID,
   getPrivateKey,
-} from './scripts/utils/config';
+} from './scripts/utils/environmentConfig';
 import '@nomiclabs/hardhat-etherscan';
 dotenv.config();
 

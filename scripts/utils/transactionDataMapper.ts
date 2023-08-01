@@ -3,9 +3,9 @@
   transaction receipt generated and return the newly mapped data .
  */
 import {ethers} from 'ethers';
-import {MappedReceipt} from './types';
+import {MappedReceipt} from './dataTypes';
 
-export async function dataMapping(
+export async function transactionDataMapper(
   txReceipt: ethers.providers.TransactionReceipt
 ): Promise<MappedReceipt> {
   try {

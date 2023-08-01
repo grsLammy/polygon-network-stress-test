@@ -1,12 +1,10 @@
 import fetch, {Response} from 'node-fetch';
-import {GasData, GasApiResponse} from './types';
+import {GAS_STATION_API_URL} from './constants';
+import {GasData, GasApiResponse} from './dataTypes';
 
-export async function fetchGasPrice(): Promise<GasData> {
+export async function gasPriceFetcher(): Promise<GasData> {
   try {
-    const response: Response = await fetch(
-      'https://gasstation-testnet.polygon.technology/v2'
-    );
-
+    const response: Response = await fetch(GAS_STATION_API_URL);
     const gasData: GasApiResponse = await response.json(); // Extract JSON data from the response
 
     // Get the maxFee and maxPriorityFee for fast
@@ -20,7 +18,6 @@ export async function fetchGasPrice(): Promise<GasData> {
     const maxPriorityFee = Math.trunc(maxPriorityFeeInGWEI * 10 ** 9);
     return {maxFee, maxPriorityFee};
   } catch (error) {
-    console.log(`Error in fetchGasPrice: ${error}`);
-    process.exit(1);
+    throw new Error(`Error in fetchGasPrice: ${error}`);
   }
 }

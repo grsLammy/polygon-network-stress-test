@@ -130,19 +130,32 @@ These constants are critical to fine-tuning the testing process, hence, develope
 
 ## User Inputs
 
-The testing process can be initiated with the `start` command, which prompts two primary user inputs: `numberOfAccounts` and `tokensPerAccount`. These parameters play a crucial role in determining the performance and results of the stress test.
+The testing process can be initiated with the `yarn run stressTest` or `npm run stressTest` command, which prompts two primary user inputs:`tokensPerAccount` and `numberOfAccounts`. These parameters play a crucial role in determining the performance and results of the stress test.
 
-- **numberOfAccounts**: This input defines the number of wallets to be set up for the test. The optimal value for achieving 1000 NFT mints in a minute under normal network conditions is `20`.
-- **tokensPerAccount**: This parameter represents the number of NFT tokens minted by each wallet in each transaction. The suggested value for reaching the 1000 NFT mints per minute target is `50`.
+- **tokensPerAccount**: This parameter represents the number of NFT tokens minted by each wallet in each transaction. The suggested value for reaching the 1000 NFT mints per minute target is `20`.
+- **numberOfAccounts**: This input defines the number of wallets to be set up for the test. The optimal value for achieving 1000 NFT mints in a minute under normal network conditions is `50`.
 
 Together, these values (20 accounts minting 50 NFTs each) generate the desired 1000 NFT mints within a minute. However, these are suggested values and can be adjusted based on specific testing needs and network conditions. It's important to note that increasing these values may amplify the network load and might require proportionate hardware resources.
 
 This project's flexibility allows you to set these parameters according to your testing requirements, ensuring you can simulate diverse scenarios based on your needs.
 
+## Stress Test Outcome
+
+During the stress test, we encountered a limitation with the free Infura service. The rate limit imposed by Infura caused most of the requests to be rejected or refused, resulting in reduced transaction throughput during the test. As a result, we were unable to achieve the desired 1000 transactions per minute using the free Infura service. We used 50 wallets to send 20 transactions per second and were able to send 1000 requests under 3 minutes.
+
+However, it's important to note that with a paid and better rate-limited service from Infura or other private RPC providers, it is indeed possible to send 1000 or more transactions within a minute to the Polygon Network. By utilizing multiple different wallets to concurrently send transactions, the network can be effectively stressed, and higher transaction rates can be achieved.
+
+## Conclusion
+
+The stress test provided valuable insights into the capabilities and limitations of the Polygon Network when subjected to high transaction and minting loads. While the free Infura service introduced rate limiting constraints, it is essential to understand that with a more robust and paid service, the performance can be significantly improved.
+
+To achieve optimal transaction throughput during stress testing, we recommend utilizing a private RPC provider such as a paid Infura or other reputable service. Additionally, it's crucial to fine-tune the testing parameters, including concurrency level, queue level, gas price optimization, and wallet funding, based on the network conditions and desired test scenarios.
+
+By employing these best practices and using a paid RPC provider, developers can obtain more accurate stress test results and better understand the true capabilities of the Polygon Network under real-world conditions.
 
 ## Note
 
-This project is purely for testing purposes and should not be used in production without proper modifications and security considerations.
+As a reminder, this stress test project is intended for testing purposes only and should not be used in production without proper modifications and security considerations. Always exercise caution when conducting stress tests on the live network and ensure you are complying with any usage guidelines and restrictions imposed by the network and RPC providers.
 
 ## License
 
